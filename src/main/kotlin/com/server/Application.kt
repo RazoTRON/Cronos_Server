@@ -3,6 +3,7 @@ package com.server
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.core.plugins.*
+import com.core.util.Constants
 import com.server.di.domainModule
 import com.server.di.mainModule
 import com.server.di.securityModule
@@ -20,6 +21,8 @@ fun main(args: Array<String>): Unit {
     val loggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
     val rootLogger = loggerContext.getLogger("org.mongodb.driver")
     rootLogger.setLevel(Level.OFF)
+
+    Constants.getInfo()
 
     io.ktor.server.netty.EngineMain.main(args)
 }

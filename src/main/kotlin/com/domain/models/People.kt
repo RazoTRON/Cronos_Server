@@ -13,10 +13,8 @@ data class People(
      val middle_name: String = "",
      val dateB: String = "",
      val key: String = "",
-     val phone_conn: Array<String> = arrayOf(),
-     val address_conn:  Array<String> = arrayOf(),
-     val passport_conn:  Array<String> = arrayOf(),
-     val anketa_conn:  Array<String> = arrayOf(),
-    @BsonId
+     val inn: String = "",
+     val phoneList: List<String> = listOf(),
+     @BsonId
      val bson_id: String = ObjectId().toString(),
 )

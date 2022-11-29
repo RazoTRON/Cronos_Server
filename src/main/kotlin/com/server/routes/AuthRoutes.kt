@@ -1,19 +1,18 @@
 package com.server.routes
 
-import com.core.responses.ApiResponse
+import com.core.responses.Resource
 import com.core.responses.AuthResponse
-import com.core.responses.CronosResponse
 import com.core.util.Constants
 import com.domain.models.User
 import com.domain.models.request.get.FindUserByUsernameRequest
 import com.domain.models.request.post.AuthRequest
+import com.domain.models.request.post.RefreshTokenRequest
 import com.domain.service.PeopleService
 import com.server.security.hashing.HashingService
 import com.server.security.hashing.SaltedHash
-import com.server.security.token.TokenBlockList
-import com.server.security.token.TokenClaim
-import com.server.security.token.TokenConfig
-import com.server.security.token.TokenService
+import com.server.security.token.*
+import com.server.security.token.TokenBlockList.add
+import com.server.security.token.TokenBlockList.get
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -28,8 +27,6 @@ fun Route.signIn() {
     val tokenService: TokenService by inject()
     val tokenConfig: TokenConfig by inject()
 
-
-
     post("/signin") {
         val request = call.receiveNullable<AuthRequest>() ?: kotlin.run {
             call.respond(HttpStatusCode.BadRequest)
@@ -37,11 +34,11 @@ fun Route.signIn() {
         }
 
         if (request.username.isBlank() || request.password.isBlank()) {
-            call.respond(HttpStatusCode.Conflict, ApiResponse.Error("Empty username or password."))
+            call.respond(HttpStatusCode.Conflict, Resource.Error("Empty username or password."))
             return@post
         }
         val user = peopleService.getUserByUsername(FindUserByUsernameRequest(request.username)) ?: kotlin.run {
-            call.respond(HttpStatusCode.Conflict, ApiResponse.Error("Invalid username or password."))
+            call.respond(HttpStatusCode.Conflict, Resource.Error("Invalid username or password."))
             return@post
         }
 
@@ -51,7 +48,7 @@ fun Route.signIn() {
         )
 
         if (!isValid) {
-            call.respond(HttpStatusCode.Conflict, ApiResponse.Error("Invalid username or password."))
+            call.respond(HttpStatusCode.Conflict, Resource.Error("Invalid username or password."))
             return@post
         }
 
@@ -73,7 +70,7 @@ fun Route.signIn() {
 
         call.respond(
             status = HttpStatusCode.OK,
-            message = ApiResponse.Success(
+            message = Resource.Success(
                 data = AuthResponse(
                     accessToken = accessToken,
                     refreshToken = refreshToken,
@@ -98,12 +95,12 @@ fun Route.signUp() {
             }
 
             if (request.username.isBlank() || request.password.isBlank()) {
-                call.respond(HttpStatusCode.Conflict, message = ApiResponse.Error(message = "Field is empty."))
+                call.respond(HttpStatusCode.Conflict, message = Resource.Error(message = "Field is empty."))
                 return@post
             }
 
             if (peopleService.getUserByUsername(FindUserByUsernameRequest(request.username)) != null) {
-                call.respond(HttpStatusCode.Conflict, ApiResponse.Error(message = "User already exist."))
+                call.respond(HttpStatusCode.Conflict, Resource.Error(message = "User already exist."))
                 return@post
             }
 
@@ -115,9 +112,9 @@ fun Route.signUp() {
                     salt = hash.salt
                 )
             )
-            call.respond(HttpStatusCode.OK, ApiResponse.Success())
+            call.respond(HttpStatusCode.OK, Resource.Success())
         } else {
-            call.respond(HttpStatusCode.NotFound, ApiResponse.Error(message = "Not found"))
+            call.respond(HttpStatusCode.NotFound, Resource.Error(message = "Not found"))
         }
     }
 }
@@ -130,52 +127,52 @@ fun Route.authenticate() {
     }
 }
 
+
 fun Route.refreshToken() {
-    authenticate {
-        val peopleService: PeopleService by inject()
-        val tokenService: TokenService by inject()
-        val tokenConfig: TokenConfig by inject()
+    val tokenService: TokenService by inject()
+    val tokenConfig: TokenConfig by inject()
 
-        post("/refresh_token") {
-            call.request.headers["Authorization"]?.let(::println)
-            val request = call.receiveNullable<AuthRequest>() ?: kotlin.run {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-            }
+    post("/refresh_token") {
+        val request = call.receiveNullable<RefreshTokenRequest>() ?: kotlin.run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
 
-            TokenBlockList.blockList.add(call.request.headers["Authorization"] ?: "")
-//
-//            if (request.username.isBlank()) {
-//                call.respond(HttpStatusCode.Conflict)
-//                return@get
-//            }
-//            val user = peopleService.getUserByUsername(FindUserByUsernameRequest(request.username)) ?: kotlin.run {
-//                call.respond(HttpStatusCode.Conflict)
-//                return@get
-//            }
-            val currentTime = System.currentTimeMillis()
+        val isVerified = tokenService.decodeToken(request.token).verify(tokenConfig)
 
-            val accessToken = tokenService.generateAccessToken(
-                tokenConfig = tokenConfig,
-                TokenClaim(
-                    name = "lastRefresh",
-                    value = currentTime.toString()
-                )
+        if (isVerified == null || TokenBlockList.get().contains(request.token)) {
+            println("Unverified refresh token.")
+            call.respond(HttpStatusCode.Unauthorized)
+            return@post
+        }
+
+        TokenBlockList.add(request.token)
+
+        val currentTime = System.currentTimeMillis()
+
+        val accessToken = tokenService.generateAccessToken(
+            tokenConfig = tokenConfig,
+            TokenClaim(
+                name = "lastRefresh",
+                value = currentTime.toString()
             )
+        )
 
-            val refreshToken = tokenService.generateRefreshToken(
-                tokenConfig = tokenConfig,
+        val refreshToken = tokenService.generateRefreshToken(
+            tokenConfig = tokenConfig,
 //                TokenClaim(
 //                    name = "userId",
 //                    value = user.id
 //                ),
-                TokenClaim(
-                    name = "lastRefresh",
-                    value = currentTime.toString() // TODO
-                )
+            TokenClaim(
+                name = "lastRefresh",
+                value = currentTime.toString() // TODO
             )
-            println("New refresh token: $refreshToken")
-            call.respond(HttpStatusCode.OK, ApiResponse.Success(AuthResponse(accessToken = accessToken, refreshToken = refreshToken)))
-        }
+        )
+        println("New refresh token: $refreshToken")
+        call.respond(
+            HttpStatusCode.OK,
+            Resource.Success(AuthResponse(accessToken = accessToken, refreshToken = refreshToken))
+        )
     }
 }

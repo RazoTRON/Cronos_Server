@@ -2,7 +2,7 @@ package com.server.di
 
 
 import com.domain.service.PeopleService
-import com.data.controller.PeopleServiceImpl
+import com.server.service.PeopleServiceImpl
 import com.core.util.Constants
 import org.koin.dsl.module
 import org.litote.kmongo.coroutine.CoroutineDatabase

@@ -1,10 +1,9 @@
-package com.data.controller
+package com.server.service
 
 import com.domain.service.PeopleService
 import com.domain.models.*
 import com.domain.models.request.get.*
 import com.domain.use_case.GetPeopleUseCase
-import com.domain.use_case.GetPhoneUseCase
 import org.koin.java.KoinJavaComponent.inject
 import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.CoroutineDatabase
@@ -14,16 +13,12 @@ class PeopleServiceImpl(
 ) : PeopleService {
 
     val getPeopleUseCase: GetPeopleUseCase by inject(GetPeopleUseCase::class.java)
-    val getPhoneUseCase: GetPhoneUseCase by inject(GetPhoneUseCase::class.java)
 
     val PE = db.getCollection<People>()
-    val PH = db.getCollection<Phone>()
     val PS = db.getCollection<Passport>()
     val AD = db.getCollection<Address>()
     val AN = db.getCollection<Anketa>()
-    val PC = db.getCollection<Phone_Connector>("phone_connector")
     val USER = db.getCollection<User>()
-
 
 
     override suspend fun newPeople(people: People) {
@@ -32,10 +27,6 @@ class PeopleServiceImpl(
 
     override suspend fun newPeopleList(peopleList: List<People>) {
         PE.insertMany(peopleList)
-    }
-
-    override suspend fun newPhoneList(phoneList: List<Phone>) {
-        PH.insertMany(phoneList)
     }
 
     override suspend fun newAddressList(addressList: List<Address>) {
@@ -50,10 +41,6 @@ class PeopleServiceImpl(
         AN.insertMany(anketaList)
     }
 
-    override suspend fun newPhoneConnectorList(phoneConnectorList: List<Phone_Connector>) {
-        PC.insertMany(phoneConnectorList)
-    }
-
     override suspend fun newUser(user: User) {
         USER.insertOne(user)
     }
@@ -64,10 +51,6 @@ class PeopleServiceImpl(
 
     override suspend fun getPeople(peoplesRequest: FindPeoplesRequest): List<People?> {
         return getPeopleUseCase.invoke(peoplesRequest)
-    }
-
-    override suspend fun getPhone(phoneRequest: FindPhoneRequest): List<Phone> {
-        return getPhoneUseCase.invoke(phoneRequest)
     }
 
     override suspend fun getAddress(addressRequest: FindAddressRequest): List<Address> {
@@ -81,10 +64,7 @@ class PeopleServiceImpl(
     override suspend fun getAnketa(anketaRequest: FindAnketaRequest): List<Anketa> {
         return AN.find(Anketa::id eq anketaRequest.id).limit(20).toList()
     }
-
-//    override suspend fun getPhoneConnector(phoneConnectorRequest: FindPhoneConnectorRequest): List<Phone_Connector> {
-//        return PC.find(Phone_Connector::peopleId eq phoneConnectorRequest.peopleId).limit(20).toList()
-//    }
-
-
 }
+
+
+

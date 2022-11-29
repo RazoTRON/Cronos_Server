@@ -6,22 +6,12 @@ import io.ktor.server.application.*
 
 fun Application.configureRouting() {
     routing {
-        peopleRoute()
+        findPeopleRoutes()
+        createPeopleRoutes()
         signUp()
         signIn()
-        reg()
+        noAuthRoutes()
         authenticate()
         refreshToken()
     }
-    
-
-//    routing {
-//        get("/") {
-//            call.respondText("Hello World!")
-//        }
-//        // Static plugin. Try to access `/static/index.html`
-//        static("/static") {
-//            resources("static")
-//        }
-//    }
 }

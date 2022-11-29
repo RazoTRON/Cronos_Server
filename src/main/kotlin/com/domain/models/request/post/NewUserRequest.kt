@@ -7,7 +7,3 @@ data class NewUserRequest(
     val password: String = "",
     val salt: String = "",
 )
-
-fun NewUserRequest.toUser(): User {
-    return User(username, password, salt)
-}

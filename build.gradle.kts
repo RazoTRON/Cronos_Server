@@ -41,8 +41,12 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 
     //KMongo
-//    implementation("org.litote.kmongo:kmongo:4.7.0")
-    implementation("org.litote.kmongo:kmongo-coroutine:4.7.0")
+    implementation("org.litote.kmongo:kmongo:4.7.2")
+    implementation("org.litote.kmongo:kmongo-core:4.7.2")
+//    implementation("org.mongodb:mongodb-driver:3.12.11")
+//    implementation("org.mongodb:mongodb-driver-sync:4.7.0")
+    implementation("org.litote.kmongo:kmongo-coroutine:4.7.2")
+
     // Koin for Ktor
     implementation("io.insert-koin:koin-ktor:$koin_version")
     // SLF4J Logger
