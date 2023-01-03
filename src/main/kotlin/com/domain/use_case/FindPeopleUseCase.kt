@@ -8,7 +8,7 @@ import org.litote.kmongo.coroutine.CoroutineDatabase
 import java.util.concurrent.TimeUnit
 
 
-class GetPeopleUseCase(val db: CoroutineDatabase) {
+class FindPeopleUseCase(val db: CoroutineDatabase) {
     suspend fun invoke(peoplesRequest: FindPeoplesRequest): List<People> {
 
         val PE = db.getCollection<People>()

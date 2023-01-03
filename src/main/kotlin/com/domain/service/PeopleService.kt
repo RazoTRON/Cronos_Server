@@ -13,7 +13,9 @@ interface PeopleService {
     suspend fun newUser(user: User)
     suspend fun getUserByUsername(findUserByUsernameRequest: FindUserByUsernameRequest): User?
 
-    suspend fun getPeople(peoplesRequest: FindPeoplesRequest): List<People?>
+    suspend fun findPeople(peoplesRequest: FindPeoplesRequest): List<People?>
+
+    suspend fun getPeople()
     suspend fun getAddress(addressRequest: FindAddressRequest): List<Address>
     suspend fun getPassport(passportRequest: FindPassportRequest): List<Passport>
     suspend fun getAnketa(anketaRequest: FindAnketaRequest): List<Anketa>

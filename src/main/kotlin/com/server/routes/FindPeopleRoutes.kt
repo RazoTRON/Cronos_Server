@@ -25,7 +25,7 @@ fun Route.findPeopleRoutes() {
     route("/api/people/find") {
         authenticate {
             get {
-                val list = peopleService.getPeople(
+                val list = peopleService.findPeople(
                     FindPeoplesRequest(
                         startId = call.request.queryParameters["startId"] ?: "",
                         id = call.request.queryParameters["id"] ?: "",

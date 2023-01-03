@@ -3,7 +3,7 @@ package com.server.service
 import com.domain.service.PeopleService
 import com.domain.models.*
 import com.domain.models.request.get.*
-import com.domain.use_case.GetPeopleUseCase
+import com.domain.use_case.FindPeopleUseCase
 import org.koin.java.KoinJavaComponent.inject
 import org.litote.kmongo.*
 import org.litote.kmongo.coroutine.CoroutineDatabase
@@ -12,7 +12,7 @@ class PeopleServiceImpl(
     db: CoroutineDatabase
 ) : PeopleService {
 
-    val getPeopleUseCase: GetPeopleUseCase by inject(GetPeopleUseCase::class.java)
+    val findPeopleUseCase: FindPeopleUseCase by inject(FindPeopleUseCase::class.java)
 
     val PE = db.getCollection<People>()
     val PS = db.getCollection<Passport>()
@@ -49,8 +49,12 @@ class PeopleServiceImpl(
         return USER.findOne(User::username eq findUserByUsernameRequest.username)
     }
 
-    override suspend fun getPeople(peoplesRequest: FindPeoplesRequest): List<People?> {
-        return getPeopleUseCase.invoke(peoplesRequest)
+    override suspend fun findPeople(peoplesRequest: FindPeoplesRequest): List<People?> {
+        return findPeopleUseCase.invoke(peoplesRequest)
+    }
+
+    override suspend fun getPeople() {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getAddress(addressRequest: FindAddressRequest): List<Address> {

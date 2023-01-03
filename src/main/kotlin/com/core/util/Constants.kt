@@ -2,7 +2,7 @@ package com.core.util
 
 object Constants {
     const val DATABASE_NAME = "bs"
-    const val REGISTER = true
+    val REGISTER = System.getenv("REG").toBoolean()
 
     const val ACCESS_TOKEN_SEC = 100
     const val REFRESH_TOKEN_SEC = 1500
